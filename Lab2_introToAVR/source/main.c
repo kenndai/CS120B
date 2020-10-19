@@ -33,5 +33,5 @@ int main(void) {
    	    // 3) Write output
 	    PORTB = tmpB;    
    	}
-    return 1;
+    return 0;
 }
