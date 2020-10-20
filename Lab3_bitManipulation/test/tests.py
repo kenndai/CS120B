@@ -15,30 +15,22 @@
 # that they are not ran in isolation but in the order shown and the state of the device is not reset or 
 # altered in between executions (unless preconditions are used).
 tests = [ {'description': 'PINA: 0xAC PINB: 0xCE => PORTC: 0x09',
-    'steps': [ {'inputs': [('PINA',0xAC), ('PINB',0xCE)], 'iterations': 1 } ],
-    'expected': [('PORTC',9)],
+    'steps': [ {'inputs': [('PINA',0xAC), ('PINB',0xCE)], 'iterations': 5 } ],
+    'expected': [('PORTC', 0x09)],
     },  
-    #{'description': 'PINA: 0x0F => PORTC: 0x00',
-    #'steps': [ {'inputs': [('PINA',0x0F)], 'iterations': 5 } ],
-    #'expected': [('PORTC',0x00)],
-    #},  
-    #{'description': 'PINA: 0x07 => PORTC: 0x01',
-    #'steps': [ {'inputs': [('PINA',0x07)], 'iterations': 5 } ],
-    #'expected': [('PORTC',0x01)],
-    #},  
-    #{'description': 'PINA: 0x14 => PORTC" 0x03',
-    #'steps': [ {'inputs': [('PINA',0x14)], 'iterations': 5} ],
-    #'expected': [('PORTC',0x03)],
-    #},  
-    #{'description': 'PINA: 0x09 => PORTC" 0x02',
-    #'steps': [ {'inputs': [('PINA',0x09)], 'iterations': 5} ],
-    #'expected': [('PORTC',0x02)],
-    #},  
+    {'description': 'PINA: 0xFF PINB: 0xFF => PORTC: 0x10',
+    'steps': [ {'inputs': [('PINA',0xFF), ('PINB',0xFF)], 'iterations': 5 } ],
+    'expected': [('PORTC',0x10)],
+    },  
+    {'description': 'PINA: 0x00 PINB: 0x00 => PORTC: 0x00',
+    'steps': [ {'inputs': [('PINA',0x00), ('PINB',0x00)], 'iterations': 5 } ],
+    'expected': [('PORTC',0x00)],
+    },  
 ]
 
 # Optionally you can add a set of "watch" variables these need to be global or static and may need
 # to be scoped at the function level (for static variables) if there are naming conflicts. The 
 # variables listed here will display everytime you hit (and stop at) a breakpoint
-watch = ['main::numOnes','main::i','main::pinA0','main::pinB0' ,'PORTC']
+watch = ['main::numOnes','PORTC']
 
 

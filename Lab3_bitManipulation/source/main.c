@@ -19,18 +19,16 @@ int main(void) {
     DDRC = 0xFF; PORTC = 0x00;
 
     unsigned char numOnes;
-    unsigned char pinA0 = 0x00;
-    unsigned char pinB0 = 0x00;
+    unsigned char tmpA = 0x00;
+    unsigned char tmpB = 0x00;
     unsigned char i;
 
     /* Insert your solution below */
     while (1) {
+	tmpA = PINA; tmpB = PINB;
 	numOnes = 0;
-        for (i = 0; i < 7; i++) {
-	    pinA0 = PINA & 0x01; pinB0 = PINB & 0x01; //get first bits of PINA and PINB
-	    if (pinA0 == 1 && pinB0 == 1) numOnes += 2; //if both bits == 1, add 2
-	    else if (pinA0 == 1 || pinB0 == 1) numOnes += 1; //if only 1 bit == 1, add 1
-	    PINA >>= 1; PINB >>= 1;
+        for (i = 0; i < 8; i++) {
+	    numOnes += ((tmpA >> i) & 0x01) + ((tmpB >> i) & 0x01);
 	}
 	PORTC = numOnes; //assign PORTC with the number of ones
     }
