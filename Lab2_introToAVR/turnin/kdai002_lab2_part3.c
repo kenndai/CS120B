@@ -1,7 +1,7 @@
-/*	Author: kdai002
+/*	Author: Kenny Dai kdai002@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section: 24
- *	Assignment: Lab #2  Exercise #1
+ *	Assignment: Lab #2  Exercise #3
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
