@@ -18,7 +18,7 @@ int main(void) {
     DDRB = 0xFF; PORTB = 0x00; //outputs B[3-0] gets the upper half of A
     DDRC = 0xFF; PORTC = 0x00; //outputs C[7-4] gets the lower half of A
 
-    unsigned char tmpB, tmpC = 0x00;
+    unsigned char tmpA, tmpB, tmpC = 0x00;
 
     /* Insert your solution below */
     while (1) {
