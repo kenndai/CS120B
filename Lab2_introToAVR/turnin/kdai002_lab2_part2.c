@@ -1,4 +1,4 @@
-/*	Author: kdai002
+/*	Author: Kenny Dai kdai002@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section: 24
  *	Assignment: Lab #2  Exercise #2
