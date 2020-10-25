@@ -20,16 +20,27 @@ void Tick() {
 	switch(state) {
 		case Start: PORTC = 7; state = Wait; break;
 		case Wait:
-			if (PINA == 3) state = Reset; 
-			else if (PINA == 1 && PINC != 9) state = Increment;
-			else if (PINA == 2 && PINC != 0) state = Decrement;
+			if (PINA == 3) { PORTC = 0; state = Reset; } 
+			else if (PINA == 1 && PINC != 9) { PORTC++; state = Increment; }
+			else if (PINA == 2 && PINC != 0) { PORTC--; state = Decrement; }
 			else state = Wait;
 			break;
-		case Increment: state = Wait; break;
-		case Decrement: state = Wait; break;
-		case Reset: state = Wait; break;
+		case Increment:
+			if (PINA == 3) { PORTC = 0; state = Reset; }
+			//if 1 is held down remain in the same state
+			else state = (PINA == 1) ? Increment : Wait;
+			break;
+		case Decrement: 
+			if (PINA == 3) { PORTC = 0; state = Reset; }
+			//if 2 is held down, remain in the same state
+			break;
+		case Reset: 
+			//if buttons are held down remain in the same state
+			state = (PINA == 3) ? Reset : Wait;
+			break;
 	}
 
+/*
 	switch(state) {
 		case Start: break;
 		case Wait: break;
@@ -37,6 +48,8 @@ void Tick() {
 		case Decrement: PORTC--; break;
 		case Reset: PORTC = 0; break;
 	}
+*/
+
 }
 
 int main() {
