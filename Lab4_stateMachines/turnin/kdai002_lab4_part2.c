@@ -33,6 +33,7 @@ void Tick() {
 		case Decrement: 
 			if (PINA == 3) { PORTC = 0; state = Reset; }
 			//if 2 is held down, remain in the same state
+			else state = (PINA == 2) ? Decrement : Wait;
 			break;
 		case Reset: 
 			//if buttons are held down remain in the same state
