@@ -18,28 +18,22 @@ tests = [ {'description': 'PINA = 0x00 => PORTB = 0x01',
     'steps': [ {'inputs': [('PINA',0x00)], 'iterations': 5 } ],
     'expected': [('PORTB',0x01)],
     },  
-    {'description': 'PINA = 0x01, 0x00, 0x01 => PORTB = 0x02; PINA = 0x00 => PORTB = 0x01',
-    'steps': [ 
-		{'inputs': [('PINA', 0x01)],'iterations': 5}, # Set PIN to val then run one iteration
-        {'inputs': [('PINA',0x00)], 'iterations': 5}, # Set PIN to val then run 300 ms
-        {'inputs': [('PINA',0x01)], 'iterations': 5, 'expected': [('PORTB',0x02)]}, 
-        {'inputs': [('PINA',0x00)], 'iterations': 5}, ],
-    'expected': [('PORTB',0x01)],
-    },
-	{'description': 'PINA = ',
-	'steps': [ 
-		{'inputs': [('PINA',0x01)], 'iterations': 5, 'expected': [('PORTB',0x01)]},
-		{'inputs': [('PINA',0x01)], 'iterations': 5}, ],
-	'expected': [('PORTB',0x01)],
-	},
-	{'description': 'PINA = 0x00 => PORTB = 0x01',
-    'steps': [ {'inputs': [('PINA',0x00)], 'iterations': 5 } ],
+	{'description': 'PINA = 0x01 => PORTB = 0x02',
+    'steps': [ {'inputs': [('PINA',0x01)], 'iterations': 1 } ],
+    'expected': [('PORTB',0x02)],
+    }, 
+	{'description': 'PINA = 0x01 => PORTB = 0x02',
+    'steps': [ {'inputs': [('PINA',0x01)], 'iterations': 100 } ],
+    'expected': [('PORTB',0x02)],
+    }, 
+    {'description': 'PINA = 0x00 => PORTB = 0x02',
+    'steps': [ {'inputs': [('PINA',0x00)], 'iterations': 2 } ],
+    'expected': [('PORTB',0x02)],
+    }, 
+    {'description': 'PINA = 0x01 => PORTB = 0x01',
+    'steps': [ {'inputs': [('PINA',0x01)], 'iterations': 1 } ],
     'expected': [('PORTB',0x01)],
     }, 
-]   
+]
 
-# Optionally you can add a set of "watch" variables these need to be global or static and may need
-# to be scoped at the function level (for static variables) if there are naming conflicts. The 
-# variables listed here will display everytime you hit (and stop at) a breakpoint
-watch = ['main::state','PINA','PORTB']
-
+watch = ['main::state', 'PINA', 'PORTB']
