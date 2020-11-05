@@ -34,7 +34,7 @@ void Tick() {
 			else state = Wait;
 			break;
 		case Increment:
-			if (A0 && !A1) { led = 0; state = Reset; }
+			if (A0 && A1) { led = 0; state = Reset; }
 			//if 1 is held down remain in the same state
 			else state = (A0) ? Increment : Wait;
 			break;
@@ -58,7 +58,6 @@ int main() {
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRC = 0xFF; PORTC = 0x00;
 	
-	led = 0;
 	state = Start;
 		
 	while(1) {
