@@ -17,19 +17,33 @@
 #include "simAVRHeader.h"
 #endif
 
+enum States {Start, Loop } state;
+
+unsigned char led = 0;
+
+void Tick() {
+	switch(state) {
+		case Start: led = 1; state = Loop; break;
+		case Loop: 
+			if (led == 4) led = 1;
+			else led = led << 1;
+			break;
+	}	
+
+	PORTB = led;
+
+}
+
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRB = 0xFF; PORTB = 0x00;
-
-    /* Insert your solution below */
-	TimerSet(1000); //1 sec 
+	
+	state = Start;
+	TimerSet(1000); 
 	TimerOn();
-	unsigned char tmpB = 0x00;
     while (1) {
-		//User code (i.e. synchSM calls)
-		tmpB = ~tmpB; // Toggle PORTB; Temporary, bad programming style
-		PORTB = tmpB;
-		while (!TimerFlag); //Wait 1 sec
+		Tick();
+		while (!TimerFlag);
 		TimerFlag = 0;
     }
     return 1;
