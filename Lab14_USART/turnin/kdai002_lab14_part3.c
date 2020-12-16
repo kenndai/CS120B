@@ -31,10 +31,11 @@ const unsigned long tasksPeriodGCD = 10;
 unsigned char data = 0;
 unsigned char i;
 unsigned short j;
+const unsigned char LeaderPeriod = 50;
 const unsigned char FollowerPeriod = 10;
 const unsigned short ReceivePeriod = 300;
 
-enum States {Start, Follower };
+enum States {Start, Leader, Follower };
 
 int Tick(int state) {
 	switch (state) {
@@ -42,10 +43,25 @@ int Tick(int state) {
 			i = j = 0; data = 0x01;			
 			state = Follower; //Start in Follower
 			break;
+		case Leader:
+			PORTC = 0x01;
+			++i;
+			if (i % LeaderPeriod == 0) { //check every LeaderPeriod
+				if (USART_IsSendReady(1)) { //check if ready to transmit, then send
+					PORTA = data;
+					USART_Send(data, 1); 
+					while (!USART_HasTransmitted(1)) {};
+					data = (data == 0x01) ? 0x00 : 0x01; //switch lights on or off
+					i = 0; //reset i
+				}
+			}
+			state = Leader;
+
+			break;
 		case Follower:
 			PORTC = 0x00;
 			
-//			if (j < ReceivePeriod) { //If data has not been received for 3 seconds switch to leader
+			if (j < ReceivePeriod) { //If data has not been received for 3 seconds switch to leader
 				++j;
 				if (j % FollowerPeriod == 0) { //check every FollowerPeriod for data
 					if (USART_HasReceived(0)) { //check if U0 has received the data
@@ -54,9 +70,10 @@ int Tick(int state) {
 						j = 0; //only RESETS j if data HAS BEEN RECEIVED
 					}	
 				}
-//			}
-
-			state = Follower;
+				state = Follower;
+			}
+			else state = Leader; //if k hits the ReceivePeriod transition into Leader
+			
 			break;
 
 		default: state = Start; break;
