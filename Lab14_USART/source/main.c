@@ -6,6 +6,7 @@
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *  Demo video: https://youtu.be/6XPJc5CGnsQ
  */
 #include <avr/io.h>
 #include "USART.h"
@@ -21,51 +22,69 @@ typedef struct task {
 	int (*TickFct)(int);
 } task;
 
-task tasks[2];
-const unsigned short tasksNum = 2;
-const unsigned long tasksPeriodGCD = 10;
+task tasks[1];
+const unsigned short tasksNum = 1;
+const unsigned long tasksPeriodGCD = 1;
 
 #include "timer.h"
 
-enum leaderStates { leaderStart, leaderLoop };
-
 unsigned char data = 0;
-unsigned char transmitted = 0;
+unsigned short i, j;
+const unsigned short LeaderPeriod = 500;
+const unsigned short FollowerPeriod = 100;
 
-int leaderTick(int state) {
+enum States {Start, Leader, Follower };
+
+/*
+todo:
+
+i not incrementing?
+
+*/
+
+
+int Tick(int state) {
 	switch (state) {
-		case leaderStart: 
-			PORTC = 0;
-			state = (PINB & 0x01) ? leaderLoop : leaderStart; break;
-		case leaderLoop:
-			PORTC = 1;
-			if (USART_IsSendReady(1)) { //USART1 sends
-				PORTA = data; //display the same data on own PORTA
-				USART_Send(data, 1); //send
-				while (!USART_HasTransmitted(1)) { continue; }
-				data = (data == 0x01) ? 0x00 : 0x01; 
+		case Start:
+			i = j = 0; data = 0x01;			
+			state = (PINB & 0x01) ? Leader: Follower;
+			break;
+		case Leader:
+			PORTC = 0x01;
+			//PORTA = 1;
+			if (i >= LeaderPeriod) { //Transmit every LeaderPeriod
+				if (USART_IsSendReady(1)) { //check if ready to transmit, then send
+					PORTA = data;
+					USART_Send(data, 1); 
+					while (!USART_HasTransmitted(1)) {};
+					data = (data == 0x01) ? 0x00 : 0x01; //switch lights on or off
+					i = 0; //reset i
+				}
 			}
-			state = (PINB & 0x01) ? leaderLoop : leaderStart;
-			break;
-		default: state = leaderStart; break;
-	}
-	return state;
-}
+			else ++i;
 
-enum followerStates { followerStart, followerLoop };
+			if (PINB & 0x01) state = Leader;
+			else { i = 0; j = 0; state = Follower; } //change state
 
-int followerTick(int state) {
-	switch (state) {
-		case followerStart: 
-			PORTC = 1;
-			state = (PINB & 0x01) ? followerStart : followerLoop; break;
-		case followerLoop:
-			PORTC = 0;
-			if (USART_HasReceived(0)) //USART0 receives
-				{ PORTA = transmitted = USART_Receive(0); USART_Flush(0); } //display then flush
-			state = (PINB & 0x01) ? followerStart : followerLoop;
 			break;
-		default: state = followerStart; break;
+		case Follower:
+			PORTC = 0x00;
+
+			if (j >= FollowerPeriod) { //Receive every FollowerPeriod
+				if (USART_HasReceived(0)) { //check if U0 has received the data, then receive
+					PORTA = USART_Receive(0); 
+					USART_Flush(0); //empty
+					j = 0; //reset j
+				}
+			}
+			else ++j;
+	
+			if (PINB & 0x01) { i = 0; j = 0; state = Leader; } //change state
+			else state = Follower;
+
+			break;
+
+		default: state = Start; break;
 	}
 	return state;
 }
@@ -78,18 +97,12 @@ int main(void) {
 	initUSART(0); initUSART(1);
 	USART_Flush(0); USART_Flush(1);
 
-	data = 0x01;
-
 	unsigned char i = 0;
-	tasks[i].state = leaderStart;
-	tasks[i].period = 1000;
+	tasks[i].state = Start;
+	tasks[i].period = 1;
 	tasks[i].elapsedTime = 0;
-	tasks[i].TickFct = &leaderTick;
+	tasks[i].TickFct = &Tick;
 	++i;
-	tasks[i].state = followerStart;
-	tasks[i].period = 100;
-	tasks[i].elapsedTime = 0;
-	tasks[i].TickFct = &followerTick;
 
 	TimerSet(tasksPeriodGCD);
 	TimerOn();

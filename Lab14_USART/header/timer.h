@@ -1,3 +1,6 @@
+#ifndef TIMER_H
+#define TIMER_H
+
 #include <avr/interrupt.h>
 
 volatile unsigned char TimerFlag = 0; // TimerISR() sets this to 1. C programmer should clear to 0.
@@ -37,9 +40,20 @@ void TimerOff() {
 }
 
 void TimerISR() {
+	unsigned char i;
+	for (i = 0; i < tasksNum; ++i) {
+		if (tasks[i].elapsedTime >= tasks[i].period) {
+			tasks[i].state = tasks[i].TickFct(tasks[i].state);
+			tasks[i].elapsedTime = 0;
+		}
+		tasks[i].elapsedTime += tasksPeriodGCD;
+	}
+}
+/*
+void TimerISR() {
 	TimerFlag = 1;
 }
-
+*/
 // In our approach, the C programmer does not touch this ISR, but rather TimserISR()
 ISR(TIMER1_COMPA_vect) {
 	// CPU automatically calls when TCNT1 == OCR1 (every 1 ms per TimerOn settings)
@@ -56,3 +70,4 @@ void TimerSet(unsigned long M) {
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
+#endif
