@@ -31,6 +31,7 @@ const unsigned long tasksPeriodGCD = 10;
 unsigned char data = 0;
 unsigned char i;
 unsigned short j;
+unsigned char fromLeader = 0;
 const unsigned char LeaderPeriod = 50;
 const unsigned char FollowerPeriod = 10;
 const unsigned short ReceivePeriod = 300;
@@ -40,11 +41,19 @@ enum States {Start, Leader, Follower };
 int Tick(int state) {
 	switch (state) {
 		case Start:
-			i = j = 0; data = 0x01;			
+			i = j = 0; fromLeader = 0; data = 0x01;			
 			state = Follower; //Start in Follower
 			break;
-		case Leader:
+		case Leader: //if leader ever receives an input, switch to Follower
 			PORTC = 0x01;
+
+			//check if U0 has received an input
+			if (USART_HasReceived(0)) { //check if U0 has received data
+				fromLeader = 1; //sets flag
+				state = Follower; //jump to Follower
+				break;
+			}
+
 			++i;
 			if (i % LeaderPeriod == 0) { //check every LeaderPeriod
 				if (USART_IsSendReady(1)) { //check if ready to transmit, then send
@@ -61,13 +70,13 @@ int Tick(int state) {
 		case Follower:
 			PORTC = 0x00;
 			
-			if (j < ReceivePeriod) { //If data has not been received for 3 seconds switch to leader
+			if (j < ReceivePeriod || fromLeader) { //If data has not been received for 3 seconds switch to leader
 				++j;
-				if (j % FollowerPeriod == 0) { //check every FollowerPeriod for data
-					if (USART_HasReceived(0)) { //check if U0 has received the data
+				if (j % FollowerPeriod == 0 || fromLeader) { //check every FollowerPeriod for data
+					if (USART_HasReceived(0) || fromLeader) { //check if U0 has received the data
 						PORTA = USART_Receive(0); 
 						USART_Flush(0);
-						j = 0; //only RESETS j if data HAS BEEN RECEIVED
+						fromLeader = j = 0; //only RESETS j and flag if data HAS BEEN RECEIVED
 					}	
 				}
 				state = Follower;
